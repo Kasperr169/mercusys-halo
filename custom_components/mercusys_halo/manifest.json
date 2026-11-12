@@ -1,0 +1,11 @@
+{
+  "domain": "mercusys_halo",
+  "name": "Mercusys Halo",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/Kasperr169/mercusys-halo",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "requirements": ["cryptography>=42.0.0"],
+  "version": "0.1.0"
+}

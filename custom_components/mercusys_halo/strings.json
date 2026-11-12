@@ -1,0 +1,87 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mercusys Halo",
+        "description": "Address of the main Halo panel and the owner password from the Mercusys app.",
+        "data": {
+          "host": "Host",
+          "password": "Password",
+          "verify_ssl": "Verify SSL certificate"
+        },
+        "data_description": {
+          "host": "IP address or URL of the main unit.",
+          "verify_ssl": "The panel uses its own certificate. Leave this off unless you installed a trusted one."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Password rejected",
+        "description": "Enter the owner password again.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot reach the Halo panel.",
+      "invalid_auth": "The owner password was rejected.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This Halo mesh is already configured.",
+      "reauth_successful": "Password updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Mercusys Halo",
+        "data": {
+          "scan_interval": "Update interval (seconds)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "wifi": {
+        "name": "Wi-Fi"
+      }
+    },
+    "button": {
+      "reboot_all": {
+        "name": "Restart all"
+      },
+      "reboot": {
+        "name": "Restart"
+      },
+      "check_firmware": {
+        "name": "Check for updates"
+      }
+    },
+    "binary_sensor": {
+      "internet": {
+        "name": "Internet"
+      },
+      "node_online": {
+        "name": "Connected"
+      }
+    },
+    "sensor": {
+      "wan_ip": {
+        "name": "WAN IP"
+      },
+      "lan_ip": {
+        "name": "LAN IP"
+      },
+      "clients": {
+        "name": "Connected clients"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Firmware"
+      }
+    }
+  }
+}

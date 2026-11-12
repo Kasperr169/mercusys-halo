@@ -1,0 +1,87 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mercusys Halo",
+        "description": "Adres głównego Halo i hasło właściciela z aplikacji Mercusys.",
+        "data": {
+          "host": "Adres",
+          "password": "Hasło",
+          "verify_ssl": "Sprawdzaj certyfikat SSL"
+        },
+        "data_description": {
+          "host": "Adres IP albo URL głównej jednostki.",
+          "verify_ssl": "Panel ma własny certyfikat. Zostaw wyłączone, jeśli nie wgrywałeś zaufanego."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Hasło odrzucone",
+        "description": "Wpisz ponownie hasło właściciela.",
+        "data": {
+          "password": "Hasło"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nie można połączyć się z panelem Halo.",
+      "invalid_auth": "Hasło właściciela zostało odrzucone.",
+      "unknown": "Nieoczekiwany błąd."
+    },
+    "abort": {
+      "already_configured": "Ta sieć Halo jest już dodana.",
+      "reauth_successful": "Hasło zaktualizowane."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Mercusys Halo",
+        "data": {
+          "scan_interval": "Odświeżanie (sekundy)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "wifi": {
+        "name": "Wi-Fi"
+      }
+    },
+    "button": {
+      "reboot_all": {
+        "name": "Restart wszystkich"
+      },
+      "reboot": {
+        "name": "Restart"
+      },
+      "check_firmware": {
+        "name": "Sprawdź aktualizacje"
+      }
+    },
+    "binary_sensor": {
+      "internet": {
+        "name": "Internet"
+      },
+      "node_online": {
+        "name": "Połączony"
+      }
+    },
+    "sensor": {
+      "wan_ip": {
+        "name": "Adres WAN"
+      },
+      "lan_ip": {
+        "name": "Adres LAN"
+      },
+      "clients": {
+        "name": "Podłączeni klienci"
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Firmware"
+      }
+    }
+  }
+}
