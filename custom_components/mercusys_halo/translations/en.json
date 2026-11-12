@@ -23,7 +23,7 @@
       }
     },
     "error": {
-      "cannot_connect": "Cannot reach the Halo panel.",
+      "cannot_connect": "Could not connect to the Halo panel. {error}",
       "invalid_auth": "The owner password was rejected.",
       "unknown": "Unexpected error."
     },

@@ -23,7 +23,7 @@
       }
     },
     "error": {
-      "cannot_connect": "Nie można połączyć się z panelem Halo.",
+      "cannot_connect": "Nie można połączyć się z panelem Halo. {error}",
       "invalid_auth": "Hasło właściciela zostało odrzucone.",
       "unknown": "Nieoczekiwany błąd."
     },

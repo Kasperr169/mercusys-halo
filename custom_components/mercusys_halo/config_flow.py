@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import voluptuous as vol
@@ -21,6 +22,7 @@ from .const import (
 from .models import parse_nodes
 
 CONF_VERIFY_SSL = "verify_ssl"
+_LOGGER = logging.getLogger(__name__)
 
 
 def _user_schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
@@ -40,6 +42,7 @@ class HaloConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Ask for the panel address and the owner password."""
         errors: dict[str, str] = {}
+        detail = ""
         if user_input is not None:
             try:
                 nodes = await _probe(
@@ -49,8 +52,10 @@ class HaloConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
             except HaloAuthError:
                 errors["base"] = "invalid_auth"
-            except (HaloConnectionError, HaloError):
+            except (HaloConnectionError, HaloError) as err:
+                _LOGGER.warning("Halo panel connection failed: %s", err)
                 errors["base"] = "cannot_connect"
+                detail = str(err)
             else:
                 master = next((node for node in nodes if node.role == "master"), nodes[0])
                 await self.async_set_unique_id(norm_mac(master.raw_mac))
@@ -63,7 +68,12 @@ class HaloConfigFlow(ConfigFlow, domain=DOMAIN):
                         CONF_VERIFY_SSL: user_input[CONF_VERIFY_SSL],
                     },
                 )
-        return self.async_show_form(step_id="user", data_schema=_user_schema(), errors=errors)
+        return self.async_show_form(
+            step_id="user",
+            data_schema=_user_schema(user_input),
+            errors=errors,
+            description_placeholders={"error": detail},
+        )
 
     async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
         """Start a password update after a rejected login."""
@@ -72,6 +82,7 @@ class HaloConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_reauth_confirm(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Ask for the owner password again."""
         errors: dict[str, str] = {}
+        detail = ""
         entry = self._get_reauth_entry()
         if user_input is not None:
             password = user_input[CONF_PASSWORD]
@@ -79,8 +90,10 @@ class HaloConfigFlow(ConfigFlow, domain=DOMAIN):
                 await _probe(entry.data[CONF_HOST], password, entry.data.get(CONF_VERIFY_SSL, False))
             except HaloAuthError:
                 errors["base"] = "invalid_auth"
-            except (HaloConnectionError, HaloError):
+            except (HaloConnectionError, HaloError) as err:
+                _LOGGER.warning("Halo panel connection failed: %s", err)
                 errors["base"] = "cannot_connect"
+                detail = str(err)
             else:
                 self.hass.config_entries.async_update_entry(
                     entry,
@@ -92,6 +105,7 @@ class HaloConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="reauth_confirm",
             data_schema=vol.Schema({vol.Required(CONF_PASSWORD): str}),
             errors=errors,
+            description_placeholders={"error": detail},
         )
 
     @staticmethod

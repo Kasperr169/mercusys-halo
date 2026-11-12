@@ -98,13 +98,28 @@ def su_encrypt(seed: str, secret: str, dictionary: str) -> str:
 
 
 def _ssl_context(verify: bool) -> ssl.SSLContext:
-    context = ssl.create_default_context()
-    if not verify:
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-    # Halo's panel still offers legacy TLS renegotiation.
-    legacy = getattr(ssl, "OP_LEGACY_SERVER_CONNECT", 0x4)
-    context.options |= legacy
+    """TLS settings the Halo panel accepts.
+
+    Home Assistant's OpenSSL refuses this panel's handshake: the certificate
+    is too small for the default security level, and the server still uses
+    legacy renegotiation. Windows can connect without either change.
+    """
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_REQUIRED if verify else ssl.CERT_NONE
+    if verify:
+        context.load_default_certs()
+    try:
+        context.set_ciphers("DEFAULT@SECLEVEL=0")
+    except ssl.SSLError:
+        _LOGGER.debug("OpenSSL did not accept the lowered security level")
+    if hasattr(ssl, "OP_NO_COMPRESSION"):
+        context.options |= ssl.OP_NO_COMPRESSION
+    context.options |= getattr(ssl, "OP_LEGACY_SERVER_CONNECT", 0x4)
+    context.options |= getattr(ssl, "OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION", 0x40000)
+    if hasattr(ssl, "TLSVersion"):
+        context.minimum_version = ssl.TLSVersion.TLSv1
+        context.maximum_version = ssl.TLSVersion.TLSv1_2
     return context
 
 
@@ -307,7 +322,10 @@ class HaloClient:
         return f"{path}{separator}id={encode_query_value(self._session_id)}"
 
     async def _open(self) -> None:
-        connector = aiohttp.TCPConnector(ssl=_ssl_context(self._verify_ssl))
+        connector = aiohttp.TCPConnector(
+            ssl=_ssl_context(self._verify_ssl),
+            force_close=True,
+        )
         self._http = aiohttp.ClientSession(timeout=self._timeout, connector=connector)
 
     async def _close(self) -> None:
@@ -331,8 +349,11 @@ class HaloClient:
                 },
                 allow_redirects=False,
             ) as response:
-                return response.status, await response.text()
-        except (aiohttp.ClientError, asyncio.TimeoutError) as err:
+                # The session dictionary is a byte string. UTF-8 would merge
+                # or reject bytes the panel expects to stay one character each.
+                payload = await response.read()
+                return response.status, payload.decode("latin-1")
+        except (aiohttp.ClientError, asyncio.TimeoutError, ssl.SSLError, OSError) as err:
             raise HaloConnectionError(str(err)) from err
 
 
